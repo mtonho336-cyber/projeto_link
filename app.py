@@ -1,4 +1,5 @@
 from flask import Flask, request, abort
+from flask import Flask, request, abort
 import requests, os
 
 app = Flask(__name__)
@@ -33,7 +34,31 @@ def home():
     }
     requests.post(WEBHOOK_URL, json=data)
 
-    return "<h1>Bem-vindo, Marcos! Você tem acesso exclusivo.</h1>"
+    return '''
+        <html>
+        <head>
+            <style>
+                body {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    background-color: #ffffff;
+                    margin: 0;
+                }
+                img {
+                    max-width: 90%;
+                    height: auto;
+                    border-radius: 10px;
+                }
+            </style>
+        </head>
+        <body>
+            <img src="https://scontent.fthe13-1.fna.fbcdn.net/v/t1.6435-9/70734133_937164883300936_3042617985685520384_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeEg_ul9WZc-DS93rlNlOvlLMWfAYLq_TjgxZ8Bgur9OOCBzJzZDDI0Q8bBy6ADwqNwLk_tRNpVEDGEJRUpQ2bhH&_nc_ohc=LXvgAnZY96kQ7kNvwE1JqV3&_nc_oc=Adlnq4erdNFq96saAlYKRY0xxaKTIqqtN2mjiAfcKT_71UrCL84JXX41_33KLhr4WFk&_nc_zt=23&_nc_ht=scontent.fthe13-1.fna&_nc_gid=EDqAjo3fcSpkpljsPuvXYA&oh=00_AfprEfjik8alcWdrT06zl3Alj2qDtod1XMfQeq_hIcCInQ&oe=69A35071"
+                 alt="Imagem centralizada">
+        </body>
+        </html>
+    '''
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000, debug=False)
