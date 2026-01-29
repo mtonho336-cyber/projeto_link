@@ -1,11 +1,10 @@
-# teste para forçar alteração
-from flask import Flask, request
-import requests
+from flask import Flask, request, abort
+import requests, os
 
 app = Flask(__name__)
 
-# 👉 Cole aqui o seu webhook do Discord
-WEBHOOK_URL = "COLOQUE_SEU_WEBHOOK_AQUI"
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+SECRET_TOKEN = os.getenv("SECRET_TOKEN")
 
 def get_location(ip):
     try:
@@ -22,31 +21,19 @@ def get_location(ip):
 
 @app.route('/')
 def home():
+    token = request.args.get("token")
+    if token != SECRET_TOKEN:
+        abort(403)
+
     ip = request.remote_addr
     localizacao = get_location(ip)
 
     data = {
-        "content": f"📢 Alguém acessou a página inicial!\nIP: {ip}\nLocalização: {localizacao}"
+        "content": f"📢 Acesso autorizado!\nIP: {ip}\nLocalização: {localizacao}"
     }
     requests.post(WEBHOOK_URL, json=data)
 
-    return '''
-        <h1>Olá, mundo! Este é o início do projeto.</h1>
-        <img src="https://scontent.fslz4-1.fna.fbcdn.net/v/t1.6435-9/70734133_937164883300936_3042617985685520384_n.jpg"
-             alt="Minha Foto" width="400">
-    '''
-
-@app.route('/link-secreto')
-def link_secreto():
-    ip = request.remote_addr
-    localizacao = get_location(ip)
-
-    data = {
-        "content": f"🔑 Alguém acessou o link secreto!\nIP: {ip}\nLocalização: {localizacao}"
-    }
-    requests.post(WEBHOOK_URL, json=data)
-
-    return 'Você acessou o link secreto com sucesso!'
+    return "<h1>Bem-vindo, Marcos! Você tem acesso exclusivo.</h1>"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000, debug=False)
