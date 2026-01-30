@@ -28,6 +28,9 @@ def home():
     # Captura o IP real do visitante (via cabeçalho X-Forwarded-For)
     ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
 
+    # Captura o User-Agent (modelo do celular/navegador)
+    user_agent = request.headers.get('User-Agent', 'Desconhecido')
+
     # Verifica se o token passado na URL é válido
     token = request.args.get("token")
     if token != SECRET_TOKEN:
@@ -36,9 +39,9 @@ def home():
     # Busca a localização do IP
     localizacao = get_location(ip)
 
-    # Envia notificação para o Discord com IP e localização
+    # Envia notificação para o Discord com IP, localização e modelo do celular
     data = {
-        "content": f"📢 Acesso autorizado!\nIP: {ip}\nLocalização: {localizacao}"
+        "content": f"📢 Acesso autorizado!\nIP: {ip}\nLocalização: {localizacao}\nDispositivo: {user_agent}"
     }
     requests.post(WEBHOOK_URL, json=data)
 
